@@ -1,74 +1,91 @@
 @extends('layout.main')
 @php
-$title = 'Tabel Informasi';
+    $title = 'Tabel Informasi';
 @endphp
 @section('content')
-    @if (session()->has('success'))
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            {{ session('success') }}
-            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-            </button>
-        </div>
-    @endif
     <div class="table-responsive">
-        <h3 class="my-4">Data MoU</h3>
-        <p class="font-weight-light">Data seluruh MoU Kampus</p>
-        <button class="btn btn-outline-success btn-sm mx-sm-2 float-right tambah-informasi" data-toggle="modal"
-            data-target="#tambah-informasi">Tambah <i class="fas fa-plus"></i></button>
-        <table id="data-mou" class="table table-hover ">
-            <thead>
-                <tr>
-                    <th scope="col">No</th>
-                    <th scope="col">Tahun</th>
-                    <th scope="col">Judul MoU</th>
-                    <th scope="col">Bidang Kerjasama</th>
-                    {{-- <th scope="col">Masa Berlaku</th> --}}
-                    <th scope="col">Tanggal Mulai</th>
-                    <th scope="col">Tanggal Selesai</th>
-                    <th scope="col">Status</th>
+        <div class="card">
+            <div class="card-header">
+                <h4 class="my-4">Tabel Data Keseluruhan
+                    <button class="btn btn-success btn-sm mx-sm-2 float-right tambah-informasi" data-toggle="modal"
+                        data-target="#tambah-informasi">Tambah <i class="fas fa-plus"></i>
+                    </button>
+                </h4>
 
-                </tr>
-            </thead>
-            <tbody>
-                @php
-                    
-                    $date = date('Y-m-d');
-                @endphp
-                @foreach ($dataMou as $r)
-                    @php
-                        
-                        if ($r->status != 'Expired') {
-                            if ($date > $r->tgl_selesai) {
-                                DB::table('data_mous')
-                                    ->where('id', $r->id)
-                                    ->update([
-                                        'status' => 'Expired',
-                                    ]);
-                        
-                                $r->status = 'Expired';
-                            }
-                        }
-                    @endphp
 
-                    <tr>
-                        <th scope="row">{{ $loop->iteration }}</th>
-                        <td>{{ $r->tahun }}</td>
-                        <td><a href="doc/{{ $r->file_pdf }}" target="blank">{{ $r->judul_mou }}</a></td>
-                        <td>{{ $r->bidang_kerjasama }}</td>
-                        {{-- <td>1 Tahun</td> --}}
-                        <td>{{ Carbon\Carbon::parse($r->tgl_mulai)->isoFormat('D MMMM Y') }}</td>
-                        <td>{{ Carbon\Carbon::parse($r->tgl_selesai)->isoFormat('D MMMM Y') }}</td>
-                        <td>
-                            <span
-                                class=" {{ $r->status === 'Aktif' ? 'badge-success' : 'badge-danger' }} badge-pill">{{ $r->status }}</span>
-                        </td>
-                    </tr>
-                @endforeach
+            </div>
+            <div class="card-body">
+                <p class="font-weight-light">List Data Tabel Memorandum of Understanding</p>
+                <table id="data-mou" class="table table-hover table-responsive-md table-bordered">
+                    <thead class="table-secondary">
+                        <tr>
+                            <th scope="col">No</th>
+                            <th scope="col">Opsi</th>
+                            <th scope="col">Tahun</th>
+                            <th scope="col">Judul MoU</th>
+                            <th scope="col">Bidang Kerjasama</th>
+                            {{-- <th scope="col">Masa Berlaku</th> --}}
+                            <th scope="col">Tanggal Mulai</th>
+                            <th scope="col">Tanggal Selesai</th>
+                            <th scope="col">Status</th>
 
-            </tbody>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @php
+                            
+                            $date = date('Y-m-d');
+                        @endphp
+                        @foreach ($dataMou as $r)
+                            @php
+                                
+                                if ($r->status != 'Expired') {
+                                    if ($date > $r->tgl_selesai) {
+                                        DB::table('data_mous')
+                                            ->where('id', $r->id)
+                                            ->update([
+                                                'status' => 'Expired',
+                                            ]);
+                                
+                                        $r->status = 'Expired';
+                                    }
+                                }
+                            @endphp
 
-        </table>
+                            <tr>
+                                <th scope="row">{{ $loop->iteration }}</th>
+                                <td>
+                                    <a href="data-edit/{{ $r->id }}"class="btn btn-warning btn-sm">Edit</a>
+
+                                    <form action="/hapus-informasi/{{ $r->id }}" method="post" class="d-inline"
+                                        onsubmit="return confirm('Apakah Anda Yakin Mengahus Data Ini ?')">
+                                        @method('delete')
+                                        @csrf
+
+                                        <input type="hidden" name="id" value="{{ $r->id }}">
+                                        <button type="submit" class="btn btn-danger btn-sm">Hapus</button>
+                                    </form>
+                                </td>
+                                <td>{{ $r->tahun }}</td>
+                                <td><a href="doc/{{ $r->file_pdf }}" target="blank">{{ $r->judul_mou }}</a></td>
+                                <td>{{ $r->bidang_kerjasama }}</td>
+                                <td>{{ Carbon\Carbon::parse($r->tgl_mulai)->isoFormat('D MMMM Y') }}</td>
+                                <td>{{ Carbon\Carbon::parse($r->tgl_selesai)->isoFormat('D MMMM Y') }}</td>
+                                <td>
+                                    <span
+                                        class=" {{ $r->status === 'Aktif' ? 'badge-success' : 'badge-danger' }} badge-pill">{{ $r->status }}
+                                    </span>
+                                </td>
+
+                            </tr>
+                        @endforeach
+
+                    </tbody>
+
+                </table>
+            </div>
+        </div>
+
 
     </div>
 
@@ -92,8 +109,8 @@ $title = 'Tabel Informasi';
 
                         <div class="form-group">
                             <label for="tahun" class="col-form-label">Tahun: </label>
-                            <input type="number" class="form-control" id="tahun" name="tahun" placeholder="Cnth: 2002"
-                                required>
+                            <input type="number" class="form-control" id="tahun" name="tahun"
+                                placeholder="Cnth: 2002" required>
                         </div>
                         <div class="form-group">
                             <label for="dengansiapa" class="col-form-label">Bidang Kerjasama: </label>
@@ -134,77 +151,26 @@ $title = 'Tabel Informasi';
 
 
 
-    {{-- <script src="https://code.jquery.com/jquery-3.5.1.js"></script> --}}
-    <script src="https://cdn.datatables.net/1.11.4/js/jquery.dataTables.min.js"></script>
-    <script src="https://cdn.datatables.net/1.11.4/js/dataTables.bootstrap4.min.js"></script>
 
+
+
+
+@section('script')
     {{-- Datatable --}}
     <script>
         $(document).ready(function() {
             $('#data-mou').DataTable();
         });
-
-        // $(document).ready(function() {
-        //     $('#panen').DataTable();
-        // });
     </script>
-
-    {{-- <script>
-        $(document).ready(function() {
-            $('.tambah-informasi').on('click', function() {
-                bootbox.confirm({
-                    size: "large",
-                    title: "Tambah Informasi",
-                    message: `<form action="">
-                                    <div class="form-group row">
-                                        <label for="dengansiapa" class="col-sm-2 col-form-label">Dengan Siapa: </label>
-                                        <div class="col-sm-10">
-                                            <input type="text" class="form-control" id="dengansiapa" required
-                                                placeholder="Cnth: Akademi Komunitas Negeri Pacitan....">
-                                        </div>
-                                    </div>
-                                    <div class="form-group row">
-                                        <label for="tentangapa" class="col-sm-2 col-form-label">Tentang Apa : </label>
-                                        <div class="col-sm-10">
-                                            <input type="text" class="form-control" id="tentangapa" placeholder="Cnth: memabngun Indonesia Maju..." required>
-                                        </div>
-                                    </div>
-                                    <div class="form-group row">
-                                        <label for="mulaitgl" class="col-sm-2 col-form-label">Mulai Tanggal :</label>
-                                        <div class="col-sm-10">
-                                            <input type="date" class="form-control" id="mulaitgl">
-                                        </div>
-                                    </div>
-                                    <div class="form-group row">
-                                        <label for="sampaitgl" class="col-sm-2 col-form-label">Sampai Tanggal :</label>
-                                        <div class="col-sm-10">
-                                            <input type="date" class="form-control" id="sampaitgl">
-                                        </div>
-                                    </div>
-                                    <div class="form-group row">
-                                        <label for="filepdf" class="col-sm-2 col-form-label">Upload File PDF :</label>
-                                        <div class="col-sm-10">
-                                            <input type="file" class="mt-1" id="filepdf">
-                                        </div>
-                                    </div>
-
-                    </form>`,
-                    buttons: {
-                        cancel: {
-                            label: '<i class="fa fa-times"></i> Cancel'
-                        },
-                        confirm: {
-                            label: '<i class="fa fa-check"></i> Confirm'
-                        }
-                    },
-                    callback: function(result) {
-                        console.log('This was logged in the callback: ' + result);
-                    }
-                });
-            });
-
-
-
-        });
-    </script> --}}
+    @if (session()->has('success'))
+        <script>
+            toastr.success(`{{ session('success') }}`);
+        </script>
+    @endif
+    @if (count($errors) > 0)
+        <script>
+            toastr.error(`{{ $errors->first() }}`);
+        </script>
+    @endif
+@endsection
 @endsection

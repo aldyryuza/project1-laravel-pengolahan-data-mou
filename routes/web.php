@@ -24,8 +24,11 @@ Route::get('/tabel-informasi', function () {
 })->middleware('auth');
 
 Route::get('/tabel-informasi', [dataMouController::class, 'index'])->middleware('auth');
+Route::get('/data-edit/{id}', [dataMouController::class, 'edit'])->middleware('auth');
 
 Route::post('/tambah-informasi', [dataMouController::class, 'store'])->middleware('auth');
+Route::post('/update-informasi', [dataMouController::class, 'update'])->middleware('auth');
+Route::delete('/hapus-informasi/{id}', [dataMouController::class, 'destroy'])->middleware('auth');
 
 
 Route::get('/login', [loginController::class, 'index'])->name('login')->middleware('guest');

@@ -1,6 +1,6 @@
 @extends('layout.main')
 @php
-$title = 'Dashboard';
+    $title = 'Dashboard';
 @endphp
 @section('content')
     <br>
@@ -32,4 +32,12 @@ $title = 'Dashboard';
         </figure>
     </div>
     <br><br>
+@endsection
+
+@section('script')
+    @if (session()->has('success'))
+        <script>
+            toastr.success(`{{ session('success') }}`);
+        </script>
+    @endif
 @endsection

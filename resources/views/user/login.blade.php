@@ -1,20 +1,8 @@
 @extends('layout.main')
 @php
-$title = 'Login';
+    $title = 'Login';
 @endphp
 @section('content')
-    @if (session()->has('loginErorr'))
-        <center>
-            <div class="alert alert-danger alert-dismissible fade show col-6" role="alert">
-                {{ session('loginErorr') }}
-
-                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-        </center>
-    @endif
-
     <main class="form-signin">
         <form action="/login" method="POST">
             @csrf
@@ -25,8 +13,8 @@ $title = 'Login';
             <div class="form-floating">
                 <label for="floatingInput">Email address</label>
 
-                <input type="email" class="form-control @error('email') is-invalid @enderror" id="floatingInput" name="email"
-                    placeholder="name@example.com" value="{{ old('email') }}" autofocus required>
+                <input type="email" class="form-control @error('email') is-invalid @enderror" id="floatingInput"
+                    name="email" placeholder="name@example.com" value="{{ old('email') }}" autofocus required>
                 @error('email')
                     <div class="invalid-feedback">
                         {{ $message }}
@@ -50,4 +38,12 @@ $title = 'Login';
             <p>admin</p>
         </div>
     </main>
+@endsection
+
+@section('script')
+    @if (session()->has('loginErorr'))
+        <script>
+            toastr.error(`{{ session('loginErorr') }}`);
+        </script>
+    @endif
 @endsection

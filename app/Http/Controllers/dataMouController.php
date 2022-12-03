@@ -4,7 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\dataMou;
 use Illuminate\Http\Request;
-
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Storage;
 
 class dataMouController extends Controller
 {
@@ -19,7 +20,7 @@ class dataMouController extends Controller
         // return view('content.tabelInformasi', [
         //     'dataMou' => $dataMou,
         // ]);
-        $dataMou = dataMou::all();
+        $dataMou = dataMou::orderBy('id', 'DESC')->get();
         return view('content.tabelInformasi', [
             'dataMou' => $dataMou,
         ]);
@@ -36,14 +37,14 @@ class dataMouController extends Controller
         // return view('');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
+
     public function store(Request $request)
     {
+
+        $pesan = [
+            'required' => 'attribute wajib diisi',
+            'mimes' => 'File harus berupa file pdf,docx,doc',
+        ];
 
         $this->validate($request, [
 
@@ -52,12 +53,13 @@ class dataMouController extends Controller
             'bidang_kerjasama' => 'required',
             'tgl_mulai' => 'required',
             'tgl_selesai' => 'required',
-            'file_pdf' => 'mimes:pdf',
-        ]);
+            'file_pdf' => 'mimes:pdf,docx,doc',
+        ], $pesan);
+
+
 
         $dokumen = $request->file('file_pdf');
         $nama_file = $dokumen->getClientOriginalName();
-        $extension = $dokumen->getClientOriginalExtension();
         $dokumen->move('doc/', $nama_file);
 
 
@@ -74,38 +76,50 @@ class dataMouController extends Controller
         return redirect('/tabel-informasi')->with(['success' => 'Data Berhasil Ditambahkan']);
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function show($id)
-    {
-        //
-    }
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
+
+
     public function edit($id)
     {
-        //
+        $dataMou = dataMou::select('*')->where('id', $id)->get();
+        return view('content.editData', [
+            'dataMou' => $dataMou,
+        ]);
     }
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, $id)
+
+    public function update(Request $request)
     {
-        //
+        $this->validate($request, [
+
+            'tahun' => 'required',
+            'judul_mou' => 'required',
+            'bidang_kerjasama' => 'required',
+            'tgl_mulai' => 'required',
+            'tgl_selesai' => 'required',
+            'file_pdf' => 'mimes:pdf',
+        ]);
+
+        if ($request->file('file_pdf') == "") {
+            $nama_file = $request->file_lama;
+        } else {
+            $dokumen = $request->file('file_pdf');
+            $nama_file = $dokumen->getClientOriginalName();
+            $dokumen->move('doc/', $nama_file);
+        }
+
+
+        dataMou::where('id', $request->id)->update([
+            'tahun' => $request->tahun,
+            'judul_mou' => $request->judul_mou,
+            'bidang_kerjasama' => $request->bidang_kerjasama,
+            'tgl_mulai' => $request->tgl_mulai,
+            'tgl_selesai' => $request->tgl_selesai,
+            'status' => $request->status,
+            'file_pdf' => $nama_file,
+
+        ]);
+        return redirect('/tabel-informasi')->with(['success' => 'Data Berhasil Di Update']);
     }
 
     /**
@@ -116,6 +130,11 @@ class dataMouController extends Controller
      */
     public function destroy($id)
     {
-        //
+        $file = dataMou::findOrFail($id);
+        $file_path = public_path('doc/' . $file->file_pdf);
+        File::delete($file_path);
+        $file->delete();
+
+        return redirect('/tabel-informasi')->with(['success' => 'Data Berhasil Di Hapus']);
     }
 }
